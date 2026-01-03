@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>В ЧЕСТЬ ВЕЛИКОГО AMAMUS</title>
     <style>
-        /* Слой-заставка */
+        /* обосрись */
         #click-overlay {
             position: fixed;
             top: 0;
@@ -249,14 +249,14 @@
         const audio = document.getElementById('bgMusic');
 
         function startSite() {
-            // 1. Убираем оверлей
+            // блядское фламинго.
             document.getElementById('click-overlay').style.display = 'none';
             document.body.style.overflow = 'auto';
             
-            // 2. Скроллим в самый верх
+            // еее
             window.scrollTo(0, 0);
             
-            // 3. Плавная музыка
+            // оуйоу
             audio.volume = 0;
             audio.play();
             let fadeInterval = setInterval(() => {
@@ -283,7 +283,7 @@
             const newComment = document.createElement('div');
             newComment.className = 'comment-item';
             
-            // Здесь ник изменен на HPPY_BRDY_:)))
+            // йоуойу
             newComment.innerHTML = `
                 <div class="comment-header">HPPY_BRDY_:))) <span style="color: #777; font-weight: normal;"> >> #${randomID}</span></div>
                 <div class="comment-meta">Posted on ${timestamp} Score: 0 (<span class="vote-link">vote Up</span>) ( <span class="vote-link">Report comment</span> )</div>
@@ -294,7 +294,7 @@
             input.value = "";
         }
 
-        // Манулы (фон)
+        // йоу
         for (let i = 0; i < 25; i++) {
             const m = document.createElement('img');
             m.src = imgPath;
@@ -306,7 +306,7 @@
             document.getElementById('snow-container').appendChild(m);
         }
 
-        // Манулы (курсор)
+        // йоу йоу
         document.addEventListener('mousemove', (e) => {
             if (Math.random() > 0.8) { 
                 const m = document.createElement('img');
@@ -324,4 +324,5 @@
         });
     </script>
 </body>
+
 </html>
