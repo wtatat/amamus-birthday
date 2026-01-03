@@ -52,12 +52,20 @@
         .main-photo, .section-img { width: 400px; border: 3px solid #000099; margin: 20px 0; background-color: #fff; }
         h1 { font-size: 3.5em; color: #000099; margin-bottom: 10px; }
         p { font-size: 1.5em; font-weight: bold; margin-top: 10px; }
+        
         .comments-container { width: 100%; max-width: 800px; text-align: left; background-color: #aae5a4; }
-        .comment-item { padding: 10px; border-bottom: 1px solid #7cb576; margin-bottom: 10px; font-size: 0.9em; }
+        .comment-item { padding: 10px; border-bottom: 1px solid #7cb576; margin-bottom: 10px; font-size: 0.9em; position: relative; }
+        
+        .reply-item { margin-left: 40px; border-left: 2px solid #000099; background: rgba(0,0,153, 0.05); }
+        .comment-img { max-width: 300px; border: 1px solid #000099; margin-top: 10px; display: block; border-radius: 4px; }
+        .reply-btn { color: #000099; cursor: pointer; text-decoration: underline; font-size: 0.8em; margin-left: 10px; }
+        .reply-to-info { background: #eee; padding: 5px; margin-bottom: 10px; display: none; font-size: 0.8em; border: 1px solid #7cb576; }
+
         .comment-header { color: #000099; font-weight: bold; }
         .comment-meta { color: #000; font-weight: bold; font-size: 0.85em; }
         .comment-body { margin-top: 8px; color: #000; font-size: 1.1em; }
         .vote-link { color: #000099; text-decoration: underline; cursor: pointer; }
+        
         .add-comment-form {
             width: 100%; max-width: 800px; margin-top: 30px; text-align: left;
             padding: 15px; border: 1px solid #7cb576; background: rgba(255,255,255,0.1);
@@ -126,27 +134,39 @@
         <div class="comments-container" id="comment-list">
             <div class="comment-item">
                 <div class="comment-header">Stupidugly83 <span style="color: #777; font-weight: normal;"> >> #34821885</span></div>
-                <div class="comment-meta">Posted on 2026-01-03 04:09:24 Score: 1488 (<span class="vote-link">vote Up</span>) ( <span class="vote-link">Report comment</span> )</div>
+                <div class="comment-meta">Posted on 2026-01-03 04:09:24 Score: 1488 (<span class="vote-link">vote Up</span>)</div>
                 <div class="comment-body">Доксинг умирающей пенсионерки</div>
             </div>
             <div class="comment-item">
                 <div class="comment-header">Anon_Manul_Lover <span style="color: #777; font-weight: normal;"> >> #34821886</span></div>
-                <div class="comment-meta">Posted on 2026-01-03 04:10:12 Score: 228 (<span class="vote-link">vote Up</span>) ( <span class="vote-link">Report comment</span> )</div>
+                <div class="comment-meta">Posted on 2026-01-03 04:10:12 Score: 228 (<span class="vote-link">vote Up</span>)</div>
                 <div class="comment-body">Вымогательство бюджета детского сада с помощью армии голубей</div>
             </div>
             <div class="comment-item">
                 <div class="comment-header">Grandpa_Hater <span style="color: #777; font-weight: normal;"> >> #34821887</span></div>
-                <div class="comment-meta">Posted on 2026-01-03 04:11:05 Score: 666 (<span class="vote-link">vote Up</span>) ( <span class="vote-link">Report comment</span> )</div>
+                <div class="comment-meta">Posted on 2026-01-03 04:11:05 Score: 666 (<span class="vote-link">vote Up</span>)</div>
                 <div class="comment-body">Подрыв инвалидного кресла СВОего дедушки</div>
             </div>
+        </div>
+
+        <div class="add-comment-form" id="comment-form-anchor">
+            <div id="reply-indicator" class="reply-to-info">
+                Ответ на сообщение <span id="reply-target-id"></span> 
+                <span style="color:red; cursor:pointer;" onclick="cancelReply()">[Отмена]</span>
             </div>
 
-        <div class="add-comment-form">
             <div style="color: #000099; font-weight: bold; margin-bottom: 5px;">Ваш ник (запомнится):</div>
             <input type="text" id="nickname-input" placeholder="HPPY_BRDY_:)))">
             <div style="color: #000099; font-weight: bold; margin-bottom: 5px;">Текст заслуги:</div>
-            <textarea id="comment-input" placeholder="Enter your merit here..."></textarea><br>
-            <button onclick="addComment()">Post comment</button>
+            <textarea id="comment-input" placeholder="Enter your merit here..."></textarea>
+            
+            <div style="margin-bottom: 10px;">
+                <div style="color: #000099; font-weight: bold; margin-bottom: 5px;">Прикрепить фото:</div>
+                <input type="file" id="file-input" accept="image/*">
+            </div>
+
+            <button id="post-btn" onclick="addComment()">Post comment</button>
+            <span id="loading-text" style="display:none; font-size:0.8em; color:#000099; margin-left:10px;">Загрузка...</span>
         </div>
     </div>
 
@@ -157,6 +177,7 @@
 
         const imgPath = 'manul.jpg';
         const audio = document.getElementById('bgMusic');
+        let currentReplyId = null;
 
         // йоу йоу
         const savedNick = localStorage.getItem('user_nickname');
@@ -170,46 +191,106 @@
 
             if (data) {
                 // йоуй оу йоу
+                const list = document.getElementById('comment-list');
+                const mainComments = data.filter(c => !c.parent_id);
+                const replies = data.filter(c => c.parent_id);
+
                 data.forEach(c => {
-                    renderNewComment(c.author_name, c.content, c.random_id, c.created_at);
+                    
                 });
-                document.getElementById('comment-count').innerText = 3 + data.length;
+                const staticCount = 3; 
+                mainComments.forEach(c => {
+                    renderNewComment(c, false);
+                    replies.filter(r => r.parent_id == c.id).forEach(r => renderNewComment(r, true));
+                });
+                
+                document.getElementById('comment-count').innerText = staticCount + data.length;
             }
         }
 
-        function renderNewComment(name, text, rid, date) {
+        function renderNewComment(c, isReply) {
             const list = document.getElementById('comment-list');
             const div = document.createElement('div');
-            div.className = 'comment-item';
-            const time = new Date(date).toLocaleString();
+            div.className = 'comment-item' + (isReply ? ' reply-item' : '');
+            const time = new Date(c.created_at).toLocaleString();
+            let imgHtml = c.image_url ? `<img src="${c.image_url}" class="comment-img">` : '';
+            
             div.innerHTML = `
-                <div class="comment-header">${name} <span style="color: #777; font-weight: normal;"> >> #${rid}</span></div>
-                <div class="comment-meta">Posted on ${time} Score: 0 (<span class="vote-link">vote Up</span>)</div>
-                <div class="comment-body">${text}</div>
+                <div class="comment-header">${c.author_name} <span style="color: #777; font-weight: normal;"> >> #${c.random_id}</span></div>
+                <div class="comment-meta">
+                    Posted on ${time} Score: 0 
+                    (<span class="vote-link" onclick="prepareReply('${c.id}', '${c.random_id}')">Ответить</span>)
+                </div>
+                <div class="comment-body">${c.content}</div>
+                ${imgHtml}
             `;
             list.appendChild(div);
+        }
+
+        function prepareReply(id, rid) {
+            currentReplyId = id;
+            document.getElementById('reply-indicator').style.display = 'block';
+            document.getElementById('reply-target-id').innerText = '#' + rid;
+            document.getElementById('comment-form-anchor').scrollIntoView();
+        }
+
+        function cancelReply() {
+            currentReplyId = null;
+            document.getElementById('reply-indicator').style.display = 'none';
         }
 
         async function addComment() {
             const nickInput = document.getElementById('nickname-input');
             const textInput = document.getElementById('comment-input');
+            const fileInput = document.getElementById('file-input');
+            const file = fileInput.files[0];
+            
             const nick = nickInput.value.trim() || "Anonymous";
             const text = textInput.value.trim();
-            if (!text) return;
+            
+            if (!text && !file) return;
+
+            document.getElementById('post-btn').disabled = true;
+            document.getElementById('loading-text').style.display = 'inline';
+
+            let uploadedImageUrl = null;
+
+            if (file) {
+                const fileName = `${Date.now()}_${file.name}`;
+                const { data: upData, error: upError } = await sbClient.storage
+                    .from('comment-images')
+                    .upload(fileName, file);
+
+                if (!upError) {
+                    const { data: urlData } = sbClient.storage
+                        .from('comment-images')
+                        .getPublicUrl(fileName);
+                    uploadedImageUrl = urlData.publicUrl;
+                }
+            }
 
             localStorage.setItem('user_nickname', nick);
             const randomID = Math.floor(Math.random() * 99999999);
 
             const { error } = await sbClient
                 .from('comments')
-                .insert([{ author_name: nick, content: text, random_id: randomID.toString() }]);
+                .insert([{ 
+                    author_name: nick, 
+                    content: text, 
+                    random_id: randomID.toString(),
+                    parent_id: currentReplyId,
+                    image_url: uploadedImageUrl
+                }]);
 
             if (!error) {
                 textInput.value = "";
+                fileInput.value = "";
                 // оу йоу
-                renderNewComment(nick, text, randomID, new Date().toISOString());
-                const count = document.getElementById('comment-count');
-                count.innerText = parseInt(count.innerText) + 1;
+                location.reload(); 
+            } else {
+                alert("Ошибка: " + error.message);
+                document.getElementById('post-btn').disabled = false;
+                document.getElementById('loading-text').style.display = 'none';
             }
         }
 
@@ -258,4 +339,3 @@
     </script>
 </body>
 </html>
-
