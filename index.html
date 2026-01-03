@@ -57,7 +57,6 @@
         .comment-item { padding: 10px; border-bottom: 1px solid #7cb576; margin-bottom: 10px; font-size: 0.9em; position: relative; }
         
         .reply-item { margin-left: 40px; border-left: 2px solid #000099; background: rgba(0,0,153, 0.05); }
-        .comment-img { max-width: 300px; border: 1px solid #000099; margin-top: 10px; display: block; border-radius: 4px; }
         .reply-btn { color: #000099; cursor: pointer; text-decoration: underline; font-size: 0.8em; margin-left: 10px; }
         .reply-to-info { background: #eee; padding: 5px; margin-bottom: 10px; display: none; font-size: 0.8em; border: 1px solid #7cb576; }
 
@@ -160,11 +159,6 @@
             <div style="color: #000099; font-weight: bold; margin-bottom: 5px;">Текст заслуги:</div>
             <textarea id="comment-input" placeholder="Enter your merit here..."></textarea>
             
-            <div style="margin-bottom: 10px;">
-                <div style="color: #000099; font-weight: bold; margin-bottom: 5px;">Прикрепить фото:</div>
-                <input type="file" id="file-input" accept="image/*">
-            </div>
-
             <button id="post-btn" onclick="addComment()">Post comment</button>
             <span id="loading-text" style="display:none; font-size:0.8em; color:#000099; margin-left:10px;">Загрузка...</span>
         </div>
@@ -179,7 +173,6 @@
         const audio = document.getElementById('bgMusic');
         let currentReplyId = null;
 
-        // йоу йоу
         const savedNick = localStorage.getItem('user_nickname');
         if (savedNick) document.getElementById('nickname-input').value = savedNick;
 
@@ -190,21 +183,20 @@
                 .order('created_at', { ascending: true });
 
             if (data) {
-                // йоуй оу йоу
                 const list = document.getElementById('comment-list');
+                while (list.children.length > 3) {
+                    list.removeChild(list.lastChild);
+                }
+
                 const mainComments = data.filter(c => !c.parent_id);
                 const replies = data.filter(c => c.parent_id);
 
-                data.forEach(c => {
-                    
-                });
-                const staticCount = 3; 
                 mainComments.forEach(c => {
                     renderNewComment(c, false);
                     replies.filter(r => r.parent_id == c.id).forEach(r => renderNewComment(r, true));
                 });
                 
-                document.getElementById('comment-count').innerText = staticCount + data.length;
+                document.getElementById('comment-count').innerText = 3 + data.length;
             }
         }
 
@@ -213,16 +205,14 @@
             const div = document.createElement('div');
             div.className = 'comment-item' + (isReply ? ' reply-item' : '');
             const time = new Date(c.created_at).toLocaleString();
-            let imgHtml = c.image_url ? `<img src="${c.image_url}" class="comment-img">` : '';
             
             div.innerHTML = `
                 <div class="comment-header">${c.author_name} <span style="color: #777; font-weight: normal;"> >> #${c.random_id}</span></div>
                 <div class="comment-meta">
                     Posted on ${time} Score: 0 
-                    (<span class="vote-link" onclick="prepareReply('${c.id}', '${c.random_id}')">Ответить</span>)
+                    (<span class="reply-btn" onclick="prepareReply('${c.id}', '${c.random_id}')">Ответить</span>)
                 </div>
                 <div class="comment-body">${c.content}</div>
-                ${imgHtml}
             `;
             list.appendChild(div);
         }
@@ -231,7 +221,7 @@
             currentReplyId = id;
             document.getElementById('reply-indicator').style.display = 'block';
             document.getElementById('reply-target-id').innerText = '#' + rid;
-            document.getElementById('comment-form-anchor').scrollIntoView();
+            document.getElementById('comment-form-anchor').scrollIntoView({ behavior: 'smooth' });
         }
 
         function cancelReply() {
@@ -242,32 +232,14 @@
         async function addComment() {
             const nickInput = document.getElementById('nickname-input');
             const textInput = document.getElementById('comment-input');
-            const fileInput = document.getElementById('file-input');
-            const file = fileInput.files[0];
             
             const nick = nickInput.value.trim() || "Anonymous";
             const text = textInput.value.trim();
             
-            if (!text && !file) return;
+            if (!text) return;
 
             document.getElementById('post-btn').disabled = true;
             document.getElementById('loading-text').style.display = 'inline';
-
-            let uploadedImageUrl = null;
-
-            if (file) {
-                const fileName = `${Date.now()}_${file.name}`;
-                const { data: upData, error: upError } = await sbClient.storage
-                    .from('comment-images')
-                    .upload(fileName, file);
-
-                if (!upError) {
-                    const { data: urlData } = sbClient.storage
-                        .from('comment-images')
-                        .getPublicUrl(fileName);
-                    uploadedImageUrl = urlData.publicUrl;
-                }
-            }
 
             localStorage.setItem('user_nickname', nick);
             const randomID = Math.floor(Math.random() * 99999999);
@@ -278,20 +250,19 @@
                     author_name: nick, 
                     content: text, 
                     random_id: randomID.toString(),
-                    parent_id: currentReplyId,
-                    image_url: uploadedImageUrl
+                    parent_id: currentReplyId
                 }]);
 
             if (!error) {
                 textInput.value = "";
-                fileInput.value = "";
-                // оу йоу
-                location.reload(); 
+                cancelReply();
+                await loadComments(); 
             } else {
-                alert("Ошибка: " + error.message);
-                document.getElementById('post-btn').disabled = false;
-                document.getElementById('loading-text').style.display = 'none';
+                alert("Ошибка БД: " + error.message);
             }
+            
+            document.getElementById('post-btn').disabled = false;
+            document.getElementById('loading-text').style.display = 'none';
         }
 
         function startSite() {
@@ -309,7 +280,6 @@
 
         document.body.style.overflow = 'hidden';
 
-        // блядское фламинго.
         for (let i = 0; i < 25; i++) {
             const m = document.createElement('img');
             m.src = imgPath;
