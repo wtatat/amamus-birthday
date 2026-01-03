@@ -2,6 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>В ЧЕСТЬ ВЕЛИКОГО AMAMUS</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -11,9 +12,9 @@
             align-items: center; z-index: 20000; cursor: pointer;
         }
         #click-text {
-            font-family: "Verdana", sans-serif; font-size: 3em; font-weight: bold;
+            font-family: "Verdana", sans-serif; font-size: 2em; font-weight: bold;
             color: #000099; text-transform: uppercase; letter-spacing: 5px;
-            animation: pulse 1.5s infinite;
+            animation: pulse 1.5s infinite; text-align: center; padding: 20px;
         }
         @keyframes pulse {
             0% { opacity: 0.5; transform: scale(1); }
@@ -28,10 +29,10 @@
         .header-bar {
             background-color: #aae5a4; height: 60px; width: 100%;
             position: fixed; top: 0; left: 0; z-index: 10000;
-            display: flex; align-items: center; padding-left: 20px;
+            display: flex; align-items: center; padding-left: 10px;
             border-bottom: 1px solid #7cb576;
         }
-        .header-logo { color: #000099; font-weight: bold; font-size: 2em; text-decoration: none; }
+        .header-logo { color: #000099; font-weight: bold; font-size: 1.5em; text-decoration: none; }
         #snow-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; }
         .manul { position: absolute; pointer-events: none; opacity: 0.6; user-select: none; }
         .manul-bg { animation: fall linear infinite; }
@@ -46,36 +47,52 @@
         }
         .section {
             min-height: 100vh; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; padding: 80px 20px 40px 20px;
+            justify-content: center; align-items: center; padding: 80px 10px 40px 10px;
             position: relative; z-index: 10; border-bottom: 1px solid #7cb576;
+            box-sizing: border-box;
         }
-        .main-photo, .section-img { width: 400px; border: 3px solid #000099; margin: 20px 0; background-color: #fff; }
-        h1 { font-size: 3.5em; color: #000099; margin-bottom: 10px; }
-        p { font-size: 1.5em; font-weight: bold; margin-top: 10px; }
+        /* Адаптивные картинки */
+        .main-photo, .section-img { 
+            max-width: 90%; 
+            width: 400px; 
+            height: auto;
+            border: 3px solid #000099; margin: 20px 0; background-color: #fff; 
+        }
+        h1 { font-size: 2em; color: #000099; margin-bottom: 10px; }
+        p { font-size: 1.2em; font-weight: bold; margin-top: 10px; }
         
         .comments-container { width: 100%; max-width: 800px; text-align: left; background-color: #aae5a4; }
-        .comment-item { padding: 10px; border-bottom: 1px solid #7cb576; margin-bottom: 10px; font-size: 0.9em; position: relative; }
+        .comment-item { padding: 10px; border-bottom: 1px solid #7cb576; margin-bottom: 10px; font-size: 0.9em; position: relative; word-wrap: break-word; }
         
-        .reply-item { margin-left: 40px; border-left: 2px solid #000099; background: rgba(0,0,153, 0.05); }
+        .reply-item { margin-left: 20px; border-left: 2px solid #000099; background: rgba(0,0,153, 0.05); }
         .reply-btn { color: #000099; cursor: pointer; text-decoration: underline; font-size: 0.8em; margin-left: 10px; }
         .reply-to-info { background: #eee; padding: 5px; margin-bottom: 10px; display: none; font-size: 0.8em; border: 1px solid #7cb576; }
 
-        .comment-header { color: #000099; font-weight: bold; }
-        .comment-meta { color: #000; font-weight: bold; font-size: 0.85em; }
-        .comment-body { margin-top: 8px; color: #000; font-size: 1.1em; }
+        .comment-header { color: #000099; font-weight: bold; font-size: 0.8em; }
+        .comment-meta { color: #000; font-weight: bold; font-size: 0.75em; }
+        .comment-body { margin-top: 8px; color: #000; font-size: 1em; }
         .vote-link { color: #000099; text-decoration: underline; cursor: pointer; }
         
         .add-comment-form {
             width: 100%; max-width: 800px; margin-top: 30px; text-align: left;
-            padding: 15px; border: 1px solid #7cb576; background: rgba(255,255,255,0.1);
+            padding: 10px; border: 1px solid #7cb576; background: rgba(255,255,255,0.1);
+            box-sizing: border-box;
         }
         .add-comment-form input, .add-comment-form textarea {
             width: 100%; box-sizing: border-box; border: 1px solid #7cb576;
             padding: 10px; font-family: Verdana; margin-bottom: 10px;
+            font-size: 16px; /* Предотвращает зум на iPhone при фокусе */
         }
         .add-comment-form button {
-            background-color: #eee; border: 1px solid #7cb576; padding: 5px 15px;
-            cursor: pointer; font-weight: bold;
+            background-color: #eee; border: 1px solid #7cb576; padding: 10px 20px;
+            cursor: pointer; font-weight: bold; width: 100%;
+        }
+
+        @media (min-width: 600px) {
+            h1 { font-size: 3.5em; }
+            .add-comment-form button { width: auto; }
+            .reply-item { margin-left: 40px; }
+            #click-text { font-size: 3em; }
         }
     </style>
 </head>
@@ -97,7 +114,7 @@
 
     <div class="section">
         <img src="AMAMUS.jpg" alt="AMAMUS" class="main-photo">
-        <h2 style="color: #000; font-weight: bold; font-size: 2.5em;">Помним, любим, скорбим</h2>
+        <h2 style="color: #000; font-weight: bold; font-size: 1.8em;">Помним, любим, скорбим</h2>
     </div>
 
     <section class="section">
@@ -129,21 +146,21 @@
     </section>
 
     <div class="section">
-        <h2 style="color: #000099; font-size: 2.5em;">ЗАСЛУГИ (<span id="comment-count">3</span>)</h2>
+        <h2 style="color: #000099; font-size: 2em;">ЗАСЛУГИ (<span id="comment-count">3</span>)</h2>
         <div class="comments-container" id="comment-list">
             <div class="comment-item">
                 <div class="comment-header">Stupidugly83 <span style="color: #777; font-weight: normal;"> >> #34821885</span></div>
-                <div class="comment-meta">Posted on 2026-01-03 04:09:24 Score: 1488 (<span class="vote-link">vote Up</span>)</div>
+                <div class="comment-meta">Posted on 2026-01-03 Score: 1488 (<span class="vote-link">vote Up</span>)</div>
                 <div class="comment-body">Доксинг умирающей пенсионерки</div>
             </div>
             <div class="comment-item">
                 <div class="comment-header">Anon_Manul_Lover <span style="color: #777; font-weight: normal;"> >> #34821886</span></div>
-                <div class="comment-meta">Posted on 2026-01-03 04:10:12 Score: 228 (<span class="vote-link">vote Up</span>)</div>
+                <div class="comment-meta">Posted on 2026-01-03 Score: 228 (<span class="vote-link">vote Up</span>)</div>
                 <div class="comment-body">Вымогательство бюджета детского сада с помощью армии голубей</div>
             </div>
             <div class="comment-item">
                 <div class="comment-header">Grandpa_Hater <span style="color: #777; font-weight: normal;"> >> #34821887</span></div>
-                <div class="comment-meta">Posted on 2026-01-03 04:11:05 Score: 666 (<span class="vote-link">vote Up</span>)</div>
+                <div class="comment-meta">Posted on 2026-01-03 Score: 666 (<span class="vote-link">vote Up</span>)</div>
                 <div class="comment-body">Подрыв инвалидного кресла СВОего дедушки</div>
             </div>
         </div>
@@ -154,7 +171,7 @@
                 <span style="color:red; cursor:pointer;" onclick="cancelReply()">[Отмена]</span>
             </div>
 
-            <div style="color: #000099; font-weight: bold; margin-bottom: 5px;">Ваш ник (запомнится):</div>
+            <div style="color: #000099; font-weight: bold; margin-bottom: 5px;">Ваш ник:</div>
             <input type="text" id="nickname-input" placeholder="HPPY_BRDY_:)))">
             <div style="color: #000099; font-weight: bold; margin-bottom: 5px;">Текст заслуги:</div>
             <textarea id="comment-input" placeholder="Enter your merit here..."></textarea>
@@ -187,15 +204,12 @@
                 while (list.children.length > 3) {
                     list.removeChild(list.lastChild);
                 }
-
                 const mainComments = data.filter(c => !c.parent_id);
                 const replies = data.filter(c => c.parent_id);
-
                 mainComments.forEach(c => {
                     renderNewComment(c, false);
                     replies.filter(r => r.parent_id == c.id).forEach(r => renderNewComment(r, true));
                 });
-                
                 document.getElementById('comment-count').innerText = 3 + data.length;
             }
         }
@@ -204,7 +218,7 @@
             const list = document.getElementById('comment-list');
             const div = document.createElement('div');
             div.className = 'comment-item' + (isReply ? ' reply-item' : '');
-            const time = new Date(c.created_at).toLocaleString();
+            const time = new Date(c.created_at).toLocaleDateString();
             
             div.innerHTML = `
                 <div class="comment-header">${c.author_name} <span style="color: #777; font-weight: normal;"> >> #${c.random_id}</span></div>
@@ -232,10 +246,8 @@
         async function addComment() {
             const nickInput = document.getElementById('nickname-input');
             const textInput = document.getElementById('comment-input');
-            
             const nick = nickInput.value.trim() || "Anonymous";
             const text = textInput.value.trim();
-            
             if (!text) return;
 
             document.getElementById('post-btn').disabled = true;
@@ -257,10 +269,7 @@
                 textInput.value = "";
                 cancelReply();
                 await loadComments(); 
-            } else {
-                alert("Ошибка БД: " + error.message);
             }
-            
             document.getElementById('post-btn').disabled = false;
             document.getElementById('loading-text').style.display = 'none';
         }
@@ -280,11 +289,11 @@
 
         document.body.style.overflow = 'hidden';
 
-        for (let i = 0; i < 25; i++) {
+        for (let i = 0; i < 15; i++) {
             const m = document.createElement('img');
             m.src = imgPath;
             m.className = 'manul manul-bg';
-            m.style.width = (Math.random() * 60 + 40) + 'px';
+            m.style.width = (Math.random() * 40 + 30) + 'px';
             m.style.left = Math.random() * 100 + 'vw';
             m.style.animationDuration = (Math.random() * 5 + 4) + 's';
             m.style.animationDelay = Math.random() * 5 + 's';
@@ -292,18 +301,17 @@
         }
 
         document.addEventListener('mousemove', (e) => {
-            if (Math.random() > 0.8) { 
+            if (Math.random() > 0.9) { 
                 const m = document.createElement('img');
                 m.src = imgPath;
                 m.className = 'manul manul-cursor';
-                m.style.width = '24px'; 
+                m.style.width = '20px'; 
                 m.style.left = e.pageX + 'px';
                 m.style.top = e.pageY + 'px';
                 m.style.position = 'absolute';
-                const fallTime = 1.5;
-                m.style.animationDuration = fallTime + 's';
+                m.style.animationDuration = '1.5s';
                 document.body.appendChild(m);
-                setTimeout(() => { m.remove(); }, fallTime * 1000);
+                setTimeout(() => { m.remove(); }, 1500);
             }
         });
     </script>
